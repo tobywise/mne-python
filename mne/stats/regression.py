@@ -12,7 +12,7 @@ from collections import namedtuple
 import numpy as np
 from scipy import linalg, sparse
 
-from ..source_estimate import SourceEstimate
+from ..source_estimate import SourceEstimate, VolSourceEstimate
 from ..epochs import BaseEpochs
 from ..evoked import Evoked, EvokedArray
 from ..utils import logger, _reject_data_segments, warn, fill_doc
@@ -73,7 +73,7 @@ def linear_regression(inst, design_matrix, names=None):
         msg = 'Fitting linear model to source estimates (generator input)'
         out = next(inst)
         data = np.array([out.data] + [i.data for i in inst])
-    elif isinstance(inst, list) and isinstance(inst[0], SourceEstimate):
+    elif isinstance(inst, list) and isinstance(inst[0], (SourceEstimate, VolSourceEstimate)):
         msg = 'Fitting linear model to source estimates (list input)'
         out = inst[0]
         data = np.array([i.data for i in inst])
@@ -89,7 +89,7 @@ def linear_regression(inst, design_matrix, names=None):
         parameters = [p[name] for p in lm_params]
         for ii, value in enumerate(parameters):
             out_ = out.copy()
-            if not isinstance(out_, (SourceEstimate, Evoked)):
+            if not isinstance(out_, (SourceEstimate, VolSourceEstimate, Evoked)):
                 raise RuntimeError('Invalid container.')
             out_._data[:] = value
             parameters[ii] = out_
